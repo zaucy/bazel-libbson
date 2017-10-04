@@ -6,7 +6,7 @@ os_freebsd=no
 os_gnu=no
 
 case "$host" in
-    *-mingw*|*-*-cygwin*)
+    *-mingw*|*-*-cygwin*|*-msys*)
         os_win32=yes
         TARGET_OS=windows
         ;;

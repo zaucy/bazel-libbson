@@ -1,0 +1,150 @@
+# genrule(
+# 	name = "configure_libbson",
+# 	cmd = "",
+# 	srcs = [
+# 		"src/bson/bson-config.h.in",
+# 		"src/bson/bson-version.h.in",
+# 		"build/cmake/bson/bson-stdint.h",
+# 	],
+# 	outs = [
+# 		"src/bson/bson-config.h",
+# 		"src/bson/bson-version.h",
+# 		"src/bson/bson-stdint.h"
+# 	]
+# )
+
+genrule(
+	name = "configure_libbson",
+	cmd = " && ".join([
+		"_ROOTDIR=\"$$PWD\"",
+		# "export CC=\"$(CC)\"",
+		"CC_DIRNAME=$$(dirname \"$(CC)\")",
+		"CC_DIRNAME=$$(cygpath $$(cygpath -d \"$$CC_DIRNAME\"))",
+		"export PATH=$$CC_DIRNAME:$$PATH",
+		"export CC=cccl",
+		"export CC_FLAGS=\"$(CC_FLAGS)\"",
+		"./autogen.sh",
+		"cd $(GENDIR)/src/bson/",
+		"ln -s $$_ROOTDIR/src/bson/bson-config.h .",
+		"ln -s $$_ROOTDIR/src/bson/bson-version.h .",
+		"ln -s $$_ROOTDIR/build/cmake/bson/bson-stdint.h .",
+	]),
+	srcs = [
+		"autogen.sh",
+		"src/bson/bson-config.h.in",
+		"src/bson/bson-version.h.in",
+		"build/cmake/bson/bson-stdint.h",
+
+		"build/autotools/CheckAtomics.m4",
+		"build/autotools/CheckCompiler.m4",
+		"build/autotools/CheckHeaders.m4",
+		"build/autotools/CheckHost.m4",
+		"build/autotools/CheckProgs.m4",
+		"build/autotools/CheckTarget.m4",
+		"build/autotools/Coverage.m4",
+		"build/autotools/Endian.m4",
+		"build/autotools/FindDependencies.m4",
+		"build/autotools/MaintainerFlags.m4",
+		"build/autotools/Optimizations.m4",
+		"build/autotools/PrintBuildConfiguration.m4",
+		"build/autotools/ReadCommandLineArguments.m4",
+		"build/autotools/SetupAutomake.m4",
+		"build/autotools/SetupLibtool.m4",
+		"build/autotools/Versions.m4",
+	],
+	outs = [
+		"src/bson/bson-config.h",
+		"src/bson/bson-version.h",
+		"src/bson/bson-stdint.h"
+	],
+	tools = [
+		"@bazel_tools//tools/cpp:lib_cc_configure.bzl"
+	]
+)
+
+# genrule(
+# 	name = "configure_libbson",
+# 	local = 1,
+# 	cmd = " && ".join([
+# 		# "_SRCDIR=$$(dirname $$(realpath src/../CMakeLists.txt))",
+# 		# "cd $$_SRCDIR",
+# 		"mkdir -p bazel-cmake",
+# 		"cd bazel-cmake",
+# 		"cmake ../ -D" + " -D".join([
+# 			"CMAKE_CXX_COMPILER=\"$(CC)\"",
+# 			"CMAKE_C_COMPILER=\"$(CC)\"",
+# 			# "CMAKE_CXX_FLAGS=\"$(CC_FLAGS)\"",
+# 			# "CMAKE_C_FLAGS=\"$(CC_FLAGS)\"",
+# 		]),
+# 	]),
+# 	srcs = ["CMakeLists.txt"],
+# 	outs = [
+# 		"src/bson/bson-config.h",
+# 		"src/bson/bson-version.h",
+# 		"src/bson/bson-stdint.h"
+# 	]
+# )
+
+cc_library(
+	name = "libbson",
+	defines = [
+		"BSON_COMPILATION",
+		"JSONSL_PARSE_NAN",
+	],
+	includes = [
+		"$(GENDIR)/src/bson",
+		"src/bson",
+		"src",
+	],
+	srcs = [
+		"src/bson/bcon.c",
+		"src/bson/bson.c",
+		"src/bson/bson-atomic.c",
+		"src/bson/bson-clock.c",
+		"src/bson/bson-context.c",
+		"src/bson/bson-decimal128.c",
+		"src/bson/bson-error.c",
+		"src/bson/bson-iso8601.c",
+		"src/bson/bson-iter.c",
+		"src/bson/bson-json.c",
+		"src/bson/bson-keys.c",
+		"src/bson/bson-md5.c",
+		"src/bson/bson-memory.c",
+		"src/bson/bson-oid.c",
+		"src/bson/bson-reader.c",
+		"src/bson/bson-string.c",
+		"src/bson/bson-timegm.c",
+		"src/bson/bson-utf8.c",
+		"src/bson/bson-value.c",
+		"src/bson/bson-version-functions.c",
+		"src/bson/bson-writer.c",
+		"src/jsonsl/jsonsl.c",
+	],
+	hdrs = [
+		":configure_libbson",
+		"src/bson/bcon.h",
+		"src/bson/bson-atomic.h",
+		"src/bson/bson-clock.h",
+		"src/bson/bson-compat.h",
+		"src/bson/bson-context.h",
+		"src/bson/bson-decimal128.h",
+		"src/bson/bson-endian.h",
+		"src/bson/bson-error.h",
+		"src/bson/bson.h",
+		"src/bson/bson-iter.h",
+		"src/bson/bson-json.h",
+		"src/bson/bson-keys.h",
+		"src/bson/bson-macros.h",
+		"src/bson/bson-md5.h",
+		"src/bson/bson-memory.h",
+		"src/bson/bson-oid.h",
+		"src/bson/bson-reader.h",
+		"src/bson/bson-stdint-win32.h",
+		"src/bson/bson-string.h",
+		"src/bson/bson-types.h",
+		"src/bson/bson-utf8.h",
+		"src/bson/bson-value.h",
+		"src/bson/bson-version-functions.h",
+		"src/bson/bson-writer.h",
+	],
+)
